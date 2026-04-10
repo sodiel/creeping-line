@@ -5,12 +5,12 @@ const toNumber = (value, fallback) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
-const CreepingLine = ({ fontSize, text, color, speed = 5, blurRadius }) => {
+const CreepingLine = ({ fontSize, text, rawText, color, speed = 5, blurRadius }) => {
   const containerRef = useRef(null);
   const textRef = useRef(null);
   const frameRef = useRef(0);
   const lastTimeRef = useRef(0);
-  const prevTextRef = useRef("");
+  const prevRawTextRef = useRef("");
   const positionRef = useRef(0);
   const speedRef = useRef(Math.max(0, toNumber(speed, 5)));
   const sizesRef = useRef({ containerWidth: 0, textWidth: 0 });
@@ -18,6 +18,7 @@ const CreepingLine = ({ fontSize, text, color, speed = 5, blurRadius }) => {
   const normalizedFontSize = Math.max(12, toNumber(fontSize, 30));
   const normalizedBlurRadius = Math.max(0, toNumber(blurRadius, 0));
   const normalizedText = String(text ?? "");
+  const normalizedRawText = String(rawText ?? "");
 
   const applyPosition = useCallback((x) => {
     positionRef.current = x;
@@ -45,8 +46,8 @@ const CreepingLine = ({ fontSize, text, color, speed = 5, blurRadius }) => {
 
   useLayoutEffect(() => {
     const { containerWidth, textWidth } = measure();
-    const textChanged = prevTextRef.current !== normalizedText;
-    prevTextRef.current = normalizedText;
+    const rawTextChanged = prevRawTextRef.current !== normalizedRawText;
+    prevRawTextRef.current = normalizedRawText;
 
     if (textWidth <= containerWidth) {
       applyPosition((containerWidth - textWidth) / 2);
@@ -54,11 +55,12 @@ const CreepingLine = ({ fontSize, text, color, speed = 5, blurRadius }) => {
     }
 
     // При вводе не допускаем сдвиг вправо: корректируемся только влево.
-    if (textChanged) {
+    // Важно: проверяем изменение rawText, а не displayText (чтобы при смене регистра позиция не прыгала)
+    if (rawTextChanged) {
       const maxAllowedX = containerWidth - textWidth;
       applyPosition(Math.min(positionRef.current, maxAllowedX));
     }
-  }, [normalizedText, normalizedFontSize, measure, applyPosition]);
+  }, [normalizedRawText, normalizedFontSize, measure, applyPosition]);
 
   useEffect(() => {
     const updateOnResize = () => {

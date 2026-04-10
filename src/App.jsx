@@ -2,22 +2,78 @@ import { useEffect, useState } from "react";
 import useFullscreen from "./hooks/useFullscreen"
 import CreepingLine from "./components/creepingLine";
 import Controls from "./components/Controls";
+import colorSchemes from "./assets/colorSchemes.json";
 import "./App.css";
+
+const DEFAULT_STATE = {
+  rawText: "test",
+  fontSize: "96",
+  lineSpeed: 300,
+  blurRadius: 3.5,
+  showGrid: true,
+  gridSize: 10,
+  isUppercase: false,
+  themeIndex: 0,
+};
+
+const STORAGE_KEY = "creepingLineState";
+
 function App() {
-  const [rawText, setRawText] = useState("test");
-  const [fontSize, setFontSize] = useState("96");
-  const [lineSpeed, setLineSpeed] = useState(300);
-  const [blurRadius, setBlurRadius] = useState(3.5);
-  const [showGrid, setShowGrid] = useState(true);
-  const [gridSize, setGridSize] = useState(10);
-  const [isUppercase, setIsUppercase] = useState(false);
+  const [rawText, setRawText] = useState(DEFAULT_STATE.rawText);
+  const [fontSize, setFontSize] = useState(DEFAULT_STATE.fontSize);
+  const [lineSpeed, setLineSpeed] = useState(DEFAULT_STATE.lineSpeed);
+  const [blurRadius, setBlurRadius] = useState(DEFAULT_STATE.blurRadius);
+  const [showGrid, setShowGrid] = useState(DEFAULT_STATE.showGrid);
+  const [gridSize, setGridSize] = useState(DEFAULT_STATE.gridSize);
+  const [isUppercase, setIsUppercase] = useState(DEFAULT_STATE.isUppercase);
+  const [themeIndex, setThemeIndex] = useState(DEFAULT_STATE.themeIndex);
+  const [isHydrated, setIsHydrated] = useState(false);
   const { isFullscreen, toggleFullscreen } = useFullscreen();
 
 
-const colorScheme = {
-  baseColor: '#471f0e',
-  accentColor: '#5fa82c',
-};
+const colorScheme = colorSchemes[themeIndex] ?? colorSchemes[0];
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        setRawText(state.rawText ?? DEFAULT_STATE.rawText);
+        setFontSize(state.fontSize ?? DEFAULT_STATE.fontSize);
+        setLineSpeed(state.lineSpeed ?? DEFAULT_STATE.lineSpeed);
+        setBlurRadius(state.blurRadius ?? DEFAULT_STATE.blurRadius);
+        setShowGrid(state.showGrid ?? DEFAULT_STATE.showGrid);
+        setGridSize(state.gridSize ?? DEFAULT_STATE.gridSize);
+        setIsUppercase(state.isUppercase ?? DEFAULT_STATE.isUppercase);
+        setThemeIndex(state.themeIndex ?? DEFAULT_STATE.themeIndex);
+      }
+    } catch (e) {
+      console.error("Failed to load state from localStorage", e);
+    } finally {
+      setIsHydrated(true);
+    }
+  }, []);
+
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    const state = {
+      rawText,
+      fontSize,
+      lineSpeed,
+      blurRadius,
+      showGrid,
+      gridSize,
+      isUppercase,
+      themeIndex,
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.error("Failed to save state to localStorage", e);
+    }
+  }, [rawText, fontSize, lineSpeed, blurRadius, showGrid, gridSize, isUppercase, themeIndex, isHydrated]);
+
 
   useEffect(() => {
     document.documentElement.style.setProperty(
@@ -31,13 +87,11 @@ const colorScheme = {
   }
   const handleChange = (event) => {
     const text = event.target.value;
-    console.log(text);
     setRawText(text);
   };
 
   const handleFontChange = (event) => {
     const text = event.target.value;
-    console.log(text);
     setFontSize(text);
   };
   const handleSubmit = (event) => {
@@ -46,7 +100,6 @@ const colorScheme = {
 
   const handleSpeedChange = (event) => {
     const speed = event.target.value;
-    console.log(speed);
     setLineSpeed(speed);
   };
 
@@ -70,6 +123,13 @@ const colorScheme = {
     setIsUppercase(event.target.checked);
   };
 
+  const handleThemeChange = (event) => {
+    const nextThemeIndex = Number(event.target.value);
+    if (!Number.isInteger(nextThemeIndex)) return;
+    if (nextThemeIndex < 0 || nextThemeIndex >= colorSchemes.length) return;
+    setThemeIndex(nextThemeIndex);
+  };
+
   const text = isUppercase ? rawText.toUpperCase() : rawText;
 
 
@@ -84,6 +144,7 @@ const colorScheme = {
       <div className="creeping-line">
         <CreepingLine
           text={text}
+          rawText={rawText}
           color={colorScheme.accentColor}
           fontSize={fontSize}
           speed={lineSpeed}
@@ -91,6 +152,7 @@ const colorScheme = {
         />
         <CreepingLine
           text={text}
+          rawText={rawText}
           color={colorScheme.accentColor}
           fontSize={fontSize}
           speed={lineSpeed}
@@ -98,6 +160,7 @@ const colorScheme = {
         />
         <CreepingLine
           text={text}
+          rawText={rawText}
           color={colorScheme.accentColor}
           fontSize={fontSize}
           speed={lineSpeed}
@@ -121,6 +184,9 @@ const colorScheme = {
           onGridSizeChange={handleGridSizeChange}
           isUppercase={isUppercase}
           onUppercaseToggle={handleUppercaseToggle}
+          selectedThemeIndex={themeIndex}
+          onThemeChange={handleThemeChange}
+          colorSchemes={colorSchemes}
           onSubmit={handleSubmit}
           onFullscreenToggle={handleFullscreenToggle}
           colorScheme={colorScheme}

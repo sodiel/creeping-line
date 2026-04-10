@@ -1,0 +1,25 @@
+[
+  { "name": "Not Pink", "baseColor": "#FFF5F7", "accentColor": "#C2185B" },
+  { "name": "Sky Blue", "baseColor": "#F2F7FF", "accentColor": "#1565C0" },
+  { "name": "Mint Frost", "baseColor": "#F1FFFA", "accentColor": "#00796B" },
+  { "name": "Sand Gold", "baseColor": "#FFF8E1", "accentColor": "#B26A00" },
+  { "name": "Cloud White", "baseColor": "#FAFAFA", "accentColor": "#37474F" },
+  { "name": "Lavender Mist", "baseColor": "#F6F3FF", "accentColor": "#5E35B1" },
+  { "name": "Peach Glow", "baseColor": "#FFF3E8", "accentColor": "#D84315" },
+  { "name": "Ice Silver", "baseColor": "#F4F6F8", "accentColor": "#455A64" },
+  { "name": "Graphite Black", "baseColor": "#121212", "accentColor": "#00E5FF" },
+  { "name": "Midnight Blue", "baseColor": "#0D1B2A", "accentColor": "#3A86FF" },
+  { "name": "Forest Shadow", "baseColor": "#0B1F1A", "accentColor": "#00FFB2" },
+  { "name": "Carbon Gray", "baseColor": "#1C1C1E", "accentColor": "#FF3D00" },
+  { "name": "Deep Violet", "baseColor": "#140F2D", "accentColor": "#B388FF" },
+  { "name": "Obsidian Red", "baseColor": "#1A0F0F", "accentColor": "#FF1744" },
+  { "name": "Neon Night", "baseColor": "#0A0A0A", "accentColor": "#39FF14" },
+  { "name": "Ocean Dark", "baseColor": "#0A192F", "accentColor": "#00B4D8" },
+  { "name": "Steel Blue", "baseColor": "#101820", "accentColor": "#4FC3F7" },
+  { "name": "Amber Black", "baseColor": "#1A1200", "accentColor": "#FFC400" },
+  { "name": "Rose Steel", "baseColor": "#1F1A1D", "accentColor": "#FF4081" },
+  { "name": "Aurora Green", "baseColor": "#0B1A13", "accentColor": "#00FF7F" },
+  { "name": "Attention", "baseColor": "#000000", "accentColor": "#FFFF00" },
+  { "name": "B&W", "baseColor": "#000000", "accentColor": "#FFFFFF" }
+
+]
