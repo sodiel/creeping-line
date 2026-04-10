@@ -9,6 +9,12 @@ const Controls = ({
   onLineSpeedChange,
   blurRadius,
   onBlurRadiusChange,
+  showGrid,
+  onGridToggle,
+  gridSize,
+  onGridSizeChange,
+  isUppercase,
+  onUppercaseToggle,
   onSubmit,
   onFullscreenToggle,
   colorScheme,
@@ -82,6 +88,19 @@ const Controls = ({
       textTransform: "uppercase",
       letterSpacing: "0.4px",
       boxShadow: `0 4px 14px ${accentColor}55`,
+    },
+    checkboxLabel: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "8px",
+      color: "#f5f5f5",
+      fontSize: "14px",
+      padding: "0 6px",
+      userSelect: "none",
+    },
+    checkbox: {
+      accentColor,
+      cursor: "pointer",
     },
   };
 
@@ -178,6 +197,33 @@ const Controls = ({
           onChange={onBlurRadiusChange}
           style={styles.input}
         />
+        <input
+          placeholder="Grid size"
+          type="number"
+          min={4}
+          max={80}
+          value={gridSize}
+          onChange={onGridSizeChange}
+          style={styles.input}
+        />
+        <label style={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            checked={showGrid}
+            onChange={onGridToggle}
+            style={styles.checkbox}
+          />
+          Show grid
+        </label>
+        <label style={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            checked={isUppercase}
+            onChange={onUppercaseToggle}
+            style={styles.checkbox}
+          />
+          UPPER CASE
+        </label>
         <button
           onClick={onFullscreenToggle}
           type="submit"

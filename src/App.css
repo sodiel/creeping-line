@@ -1,5 +1,6 @@
 :root {
   --base-color: black;
+  --grid-size: 10px;
 }
 
 body {
@@ -46,7 +47,7 @@ button {
   background-image:
     linear-gradient(var(--base-color) 2px, transparent 1px),
     linear-gradient(90deg, var(--base-color) 2px, transparent 1px);
-  background-size: 10px 10px;
+  background-size: var(--grid-size, 10px) var(--grid-size, 10px);
   pointer-events: none;
   z-index: 999;
 }

@@ -4,10 +4,13 @@ import CreepingLine from "./components/creepingLine";
 import Controls from "./components/Controls";
 import "./App.css";
 function App() {
-  const [text, setText] = useState("test");
-  const [fontSize, setFontSize] = useState("48");
+  const [rawText, setRawText] = useState("test");
+  const [fontSize, setFontSize] = useState("96");
   const [lineSpeed, setLineSpeed] = useState(300);
-  const [blurRadius, setBlurRadius] = useState(1.5);
+  const [blurRadius, setBlurRadius] = useState(3.5);
+  const [showGrid, setShowGrid] = useState(true);
+  const [gridSize, setGridSize] = useState(10);
+  const [isUppercase, setIsUppercase] = useState(false);
   const { isFullscreen, toggleFullscreen } = useFullscreen();
 
 
@@ -29,7 +32,7 @@ const colorScheme = {
   const handleChange = (event) => {
     const text = event.target.value;
     console.log(text);
-    setText(text);
+    setRawText(text);
   };
 
   const handleFontChange = (event) => {
@@ -53,10 +56,31 @@ const colorScheme = {
     setBlurRadius(blur);
   };
 
+  const handleGridSizeChange = (event) => {
+    const nextSize = Number(event.target.value);
+    if (!Number.isFinite(nextSize)) return;
+    setGridSize(Math.max(4, Math.min(80, nextSize)));
+  };
+
+  const handleGridToggle = (event) => {
+    setShowGrid(event.target.checked);
+  };
+
+  const handleUppercaseToggle = (event) => {
+    setIsUppercase(event.target.checked);
+  };
+
+  const text = isUppercase ? rawText.toUpperCase() : rawText;
+
 
   return (
     <>
-       <div className="grid-overlay"></div>
+      {showGrid && (
+        <div
+          className="grid-overlay"
+          style={{ "--grid-size": `${gridSize}px` }}
+        ></div>
+      )}
       <div className="creeping-line">
         <CreepingLine
           text={text}
@@ -83,7 +107,7 @@ const colorScheme = {
 
       {(!isFullscreen) && (
         <Controls
-          text={text}
+          text={rawText}
           fontSize={fontSize}
           blurRadius={blurRadius}
           onBlurRadiusChange={handleBlurChange}
@@ -91,6 +115,12 @@ const colorScheme = {
           onTextChange={handleChange}
           onFontSizeChange={handleFontChange}
           onLineSpeedChange={handleSpeedChange}
+          showGrid={showGrid}
+          onGridToggle={handleGridToggle}
+          gridSize={gridSize}
+          onGridSizeChange={handleGridSizeChange}
+          isUppercase={isUppercase}
+          onUppercaseToggle={handleUppercaseToggle}
           onSubmit={handleSubmit}
           onFullscreenToggle={handleFullscreenToggle}
           colorScheme={colorScheme}
