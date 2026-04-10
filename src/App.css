@@ -1,10 +1,18 @@
-body {
-  background-color: black;
-  --blur-radius: 4px; /* not used. using inline styles in App.jsx */
+:root {
+  --base-color: black;
 }
 
-.inputs {
+body {
+  background-color: var(--base-color, black);
+}
+
+input {
   color: gray;
+  background-color: black;
+}
+button {
+  color: gray;
+  background-color: black;
 }
 
 .creeping-line {
@@ -12,25 +20,12 @@ body {
   flex-direction: column;
   justify-content: center;
 
-  filter: blur(4px) brightness(2) saturate(2);
+  filter: brightness(2.5) saturate(2);
   mix-blend-mode: screen;
   width: 100%;
   height: 100vh;
 }
-.grid-overlay {
-  position: fixed;
-  top: 0;
 
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image:
-          linear-gradient(rgba(0, 0, 0, 0.8) 2px, transparent 1px),
-          linear-gradient(90deg, rgba(0, 0, 0, 0.8) 2px, transparent 1px);
-  background-size: 10px 10px;
-  pointer-events: none;
-  z-index: 9999;
-}
 
 
 @font-face {
@@ -40,5 +35,18 @@ body {
 
 @font-face {
   font-family: 'PacManSenior-Regular'; /*a name to be used later*/
-  src: url("src/assets/fonts/PacManSenior/PacManSenior-Regular.otf"); /*URL to font*/
+  src: url("assets/fonts/PacManSenior/PacManSenior-Regular.otf"); /*URL to font*/
+}
+
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(var(--base-color) 2px, transparent 1px),
+    linear-gradient(90deg, var(--base-color) 2px, transparent 1px);
+  background-size: 10px 10px;
+  pointer-events: none;
+  z-index: 999;
 }

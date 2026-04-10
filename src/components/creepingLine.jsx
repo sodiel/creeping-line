@@ -1,97 +1,154 @@
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 
+const toNumber = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
 
-
-
-const CreepingLine = ({ fontSize, text, color, speed = 5 }) => {
+const CreepingLine = ({ fontSize, text, color, speed = 5, blurRadius }) => {
   const containerRef = useRef(null);
-  const [capacity, setCapacity] = useState(0);
+  const textRef = useRef(null);
+  const frameRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const prevTextRef = useRef("");
+  const positionRef = useRef(0);
+  const speedRef = useRef(Math.max(0, toNumber(speed, 5)));
+  const sizesRef = useRef({ containerWidth: 0, textWidth: 0 });
 
-  const [buffer, setBuffer] = useState((text + "   ").split(""));
-  const lastChangeTime = useRef(Date.now());
+  const normalizedFontSize = Math.max(12, toNumber(fontSize, 30));
+  const normalizedBlurRadius = Math.max(0, toNumber(blurRadius, 0));
+  const normalizedText = String(text ?? "");
 
-  useEffect(() => {
-    const measureCapacity = () => {
-      if (!containerRef.current) return;
-      const span = document.createElement("span");
-      span.style.fontSize = fontSize ;
-      span.style.fontFamily = "monospace";
-      span.style.visibility = "hidden";
-      span.innerText = "W";
+  const applyPosition = useCallback((x) => {
+    positionRef.current = x;
+    if (!textRef.current) return;
+    textRef.current.style.transform = `translate3d(${x}px, 0, 0)`;
+  }, []);
 
-      document.body.appendChild(span);
-      const charWidth = span.getBoundingClientRect().width;
-      const containerWidth = containerRef.current.offsetWidth;
-      document.body.removeChild(span);
-      if (charWidth > 0) setCapacity(Math.floor(containerWidth / charWidth));
+  const measure = useCallback(() => {
+    if (!containerRef.current || !textRef.current) {
+      return { containerWidth: 0, textWidth: 0 };
+    }
+
+    const next = {
+      containerWidth: containerRef.current.clientWidth,
+      textWidth: textRef.current.scrollWidth,
     };
-    measureCapacity();
-    const observer = new ResizeObserver(measureCapacity);
-    if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [fontSize]);
+
+    sizesRef.current = next;
+    return next;
+  }, []);
 
   useEffect(() => {
-    setBuffer((text + "   ").split(""));
-    lastChangeTime.current = Date.now();
-  }, [text]);
+    speedRef.current = Math.max(0, toNumber(speed, 5));
+  }, [speed]);
+
+  useLayoutEffect(() => {
+    const { containerWidth, textWidth } = measure();
+    const textChanged = prevTextRef.current !== normalizedText;
+    prevTextRef.current = normalizedText;
+
+    if (textWidth <= containerWidth) {
+      applyPosition((containerWidth - textWidth) / 2);
+      return;
+    }
+
+    // При вводе не допускаем сдвиг вправо: корректируемся только влево.
+    if (textChanged) {
+      const maxAllowedX = containerWidth - textWidth;
+      applyPosition(Math.min(positionRef.current, maxAllowedX));
+    }
+  }, [normalizedText, normalizedFontSize, measure, applyPosition]);
 
   useEffect(() => {
-    if (speed <= 0) return;
+    const updateOnResize = () => {
+      const { containerWidth, textWidth } = measure();
+      if (textWidth <= containerWidth) {
+        applyPosition((containerWidth - textWidth) / 2);
+      }
+    };
 
-    const timeToSleep = 1000 / speed;
+    updateOnResize();
+    window.addEventListener("resize", updateOnResize);
 
-    const interval = setInterval(() => {
-      if (text.length <= capacity) {
-        return;
+    let observer;
+    if (containerRef.current && textRef.current) {
+      observer = new ResizeObserver(updateOnResize);
+      observer.observe(containerRef.current);
+      observer.observe(textRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateOnResize);
+      if (observer) observer.disconnect();
+    };
+  }, [measure, applyPosition]);
+
+  useEffect(() => {
+    const step = (time) => {
+      const { containerWidth, textWidth } = sizesRef.current;
+
+      if (!lastTimeRef.current) {
+        lastTimeRef.current = time;
       }
 
-      if (Date.now() - lastChangeTime.current < 1000) return;
+      const deltaSeconds = (time - lastTimeRef.current) / 1000;
+      lastTimeRef.current = time;
 
-      setBuffer((prev) => {
-        const newBuffer = [...prev];
-        const firstLetter = newBuffer[0];
-        for (let i = 0; i < newBuffer.length - 1; i++) {
-          newBuffer[i] = newBuffer[i + 1];
+      const shouldMove = textWidth > containerWidth && speedRef.current > 0;
+      if (shouldMove) {
+        let nextX = positionRef.current - speedRef.current * deltaSeconds;
+
+        if (nextX + textWidth < 0) {
+          nextX = containerWidth;
         }
-        newBuffer[newBuffer.length - 1] = firstLetter;
-        return newBuffer;
-      });
-    }, timeToSleep);
 
-    return () => clearInterval(interval);
-  }, [speed, capacity, text]);
+        applyPosition(nextX);
+      }
 
-  const screen = buffer.slice(0, capacity).join("");
+      frameRef.current = window.requestAnimationFrame(step);
+    };
 
-  const style = {
+    frameRef.current = window.requestAnimationFrame(step);
 
-    fontSize: fontSize +"px",
-    color,
-
-    fontFamily: "PacManSenior-Regular",
-    whiteSpace: "pre",
-    overflow: "hidden",
-
-
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "black",
-    margin: 0,
-    padding: 0,
-  }
-
-
-
+    return () => {
+      window.cancelAnimationFrame(frameRef.current);
+      lastTimeRef.current = 0;
+    };
+  }, [applyPosition]);
 
   return (
-      <div
-          ref={containerRef}
-          style={style}
+    <div
+      ref={containerRef}
+      style={{
+        position: "relative",
+        width: "100%",
+        overflow: "hidden",
+        minHeight: `${normalizedFontSize * 1.35}px`,
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
+      <span
+        ref={textRef}
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          whiteSpace: "pre",
+          fontFamily: "PacManSenior-Regular",
+          fontSize: `${normalizedFontSize}px`,
+          color,
+          filter: `blur(${normalizedBlurRadius}px)`,
+          willChange: "transform",
+        }}
       >
-        {screen}
-      </div>
+        {normalizedText}
+      </span>
+    </div>
   );
 };
 
