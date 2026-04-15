@@ -21,6 +21,8 @@ const Controls = ({
   onSubmit,
   onFullscreenToggle,
   colorScheme,
+  lineCount,
+  onLineCountChange
 }) => {
 
   const { baseColor, accentColor } = colorScheme;
@@ -249,6 +251,18 @@ const Controls = ({
           />
         </div>
         <div style={styles.controlGroup}>
+          <span style={styles.caption}>Line count</span>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            step={1}
+            value={lineCount}
+            onChange={onLineCountChange}
+            style={styles.input}
+            />
+        </div>
+        <div style={styles.controlGroup}>
           <span style={styles.caption}>Theme</span>
           <select
             value={selectedThemeIndex}
@@ -293,7 +307,7 @@ const Controls = ({
         </div>
         <button
           onClick={onFullscreenToggle}
-          type="submit"
+          type="button"
           style={styles.button}
         >
           fullscreen mode

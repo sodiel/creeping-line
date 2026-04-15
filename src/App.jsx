@@ -14,6 +14,7 @@ const DEFAULT_STATE = {
   gridSize: 10,
   isUppercase: false,
   themeIndex: 0,
+  lineCount: 1,
 };
 
 const STORAGE_KEY = "creepingLineState";
@@ -25,6 +26,7 @@ function App() {
   const [blurRadius, setBlurRadius] = useState(DEFAULT_STATE.blurRadius);
   const [showGrid, setShowGrid] = useState(DEFAULT_STATE.showGrid);
   const [gridSize, setGridSize] = useState(DEFAULT_STATE.gridSize);
+  const [lineCount, setLineCount] = useState(DEFAULT_STATE.lineCount);
   const [isUppercase, setIsUppercase] = useState(DEFAULT_STATE.isUppercase);
   const [themeIndex, setThemeIndex] = useState(DEFAULT_STATE.themeIndex);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -46,6 +48,7 @@ const colorScheme = colorSchemes[themeIndex] ?? colorSchemes[0];
         setGridSize(state.gridSize ?? DEFAULT_STATE.gridSize);
         setIsUppercase(state.isUppercase ?? DEFAULT_STATE.isUppercase);
         setThemeIndex(state.themeIndex ?? DEFAULT_STATE.themeIndex);
+        setLineCount(state.lineCount ?? DEFAULT_STATE.lineCount);
       }
     } catch (e) {
       console.error("Failed to load state from localStorage", e);
@@ -66,13 +69,14 @@ const colorScheme = colorSchemes[themeIndex] ?? colorSchemes[0];
       gridSize,
       isUppercase,
       themeIndex,
+      lineCount,
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
       console.error("Failed to save state to localStorage", e);
     }
-  }, [rawText, fontSize, lineSpeed, blurRadius, showGrid, gridSize, isUppercase, themeIndex, isHydrated]);
+  }, [rawText, fontSize, lineSpeed, blurRadius, showGrid, gridSize, isUppercase, themeIndex, isHydrated, lineCount]);
 
 
   useEffect(() => {
@@ -94,6 +98,11 @@ const colorScheme = colorSchemes[themeIndex] ?? colorSchemes[0];
     const text = event.target.value;
     setFontSize(text);
   };
+
+  const handleLineCountChange = (event) => {
+    const lineCount = event.target.value;
+    setLineCount(lineCount);
+  }
   const handleSubmit = (event) => {
     event.preventDefault();
   };
@@ -105,7 +114,6 @@ const colorScheme = colorSchemes[themeIndex] ?? colorSchemes[0];
 
   const handleBlurChange = (event) => {
     const blur = event.target.value;
-
     setBlurRadius(blur);
   };
 
@@ -142,30 +150,18 @@ const colorScheme = colorSchemes[themeIndex] ?? colorSchemes[0];
         ></div>
       )}
       <div className="creeping-line">
-        <CreepingLine
-          text={text}
-          rawText={rawText}
-          color={colorScheme.accentColor}
-          fontSize={fontSize}
-          speed={lineSpeed}
-          blurRadius={blurRadius}
-        />
-        <CreepingLine
-          text={text}
-          rawText={rawText}
-          color={colorScheme.accentColor}
-          fontSize={fontSize}
-          speed={lineSpeed}
-          blurRadius={blurRadius}
-        />
-        <CreepingLine
-          text={text}
-          rawText={rawText}
-          color={colorScheme.accentColor}
-          fontSize={fontSize}
-          speed={lineSpeed}
-          blurRadius={blurRadius}
-        />
+
+
+        {[...Array(Number(lineCount))].map((e, i) =>  <CreepingLine
+            text={text}
+            rawText={rawText}
+            color={colorScheme.accentColor}
+            fontSize={fontSize}
+            speed={lineSpeed}
+            blurRadius={blurRadius}
+            key={i}
+        />)}
+
       </div>
 
       {(!isFullscreen) && (
@@ -190,6 +186,8 @@ const colorScheme = colorSchemes[themeIndex] ?? colorSchemes[0];
           onSubmit={handleSubmit}
           onFullscreenToggle={handleFullscreenToggle}
           colorScheme={colorScheme}
+          lineCount={lineCount}
+          onLineCountChange={handleLineCountChange}
         />
       )}
     </>
