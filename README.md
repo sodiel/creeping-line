@@ -10,9 +10,6 @@ Creeping Line is a React + Vite playground for animated ticker text, live theme 
 
 ## Demo
 
-<video src=".docs/video/video.mp4" controls autoplay muted loop playsinline width="100%"></video>
-
-If your viewer cannot play embedded video, open it directly:
 [`docs/video/video.mp4`](docs/video/video.mp4)
 
 ## Screenshots
